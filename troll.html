@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>BRAWL_SECRET</title>
+    <style>
+        body {
+            background-image: url('brawl.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-color: #333;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        #console {
+            display: none; 
+            width: 90%;
+            max-width: 700px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 4px solid #fff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,1);
+            min-height: 400px;
+            box-sizing: border-box;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        #output { flex-grow: 1; overflow-y: auto; color: #fff; font-size: 18px; text-shadow: 2px 2px 0 #000; }
+        .line { margin-bottom: 8px; }
+        .warning { color: #ff3333; }
+        .success { color: #00ff41; }
+
+        /* ЭЛЬ ПРИМО (GIF) */
+        #elprimo {
+            display: none;
+            position: fixed;
+            bottom: -600px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 450px;
+            z-index: 100; 
+            pointer-events: none;
+        }
+
+        .elprimo-fly-up {
+            display: block !important;
+            animation: elprimoIn 1s cubic-bezier(0.25, 1, 0.5, 1) forwards,
+                       elprimoShake 0.5s infinite 1s alternate;
+        }
+
+        .elprimo-jump-up {
+            animation: elprimoOut 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes elprimoIn {
+            0% { bottom: -600px; transform: translateX(-50%) scale(0.5) rotate(-10deg); opacity: 0; }
+            100% { bottom: 50px; transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        @keyframes elprimoShake {
+            0% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+            25% { transform: translateX(-52%) translateY(-10px) rotate(-2deg); }
+            50% { transform: translateX(-48%) translateY(0px) rotate(2deg); }
+            75% { transform: translateX(-52%) translateY(-10px) rotate(-2deg); }
+            100% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes elprimoOut {
+            0% { bottom: 50px; transform: translateX(-50%) scale(1) translateY(0) rotate(0deg); }
+            20% { bottom: 50px; transform: translateX(-50%) scale(1.1) translateY(60px) rotate(15deg); }
+            100% { bottom: 120vh; transform: translateX(-50%) scale(0.5) translateY(0) rotate(-180deg) skew(30deg); opacity: 0; }
+        }
+
+        #startBtn {
+            background: linear-gradient(to bottom, #fce000 0%, #ffc000 100%);
+            border: 5px solid #7d4400;
+            border-radius: 15px;
+            color: #7d4400;
+            padding: 20px 40px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0 #fff;
+            box-shadow: 0 8px 0 #7d4400;
+            z-index: 60;
+            transition: 0.1s;
+        }
+        #startBtn:active { transform: translateY(5px); box-shadow: 0 2px 0 #7d4400; }
+
+        #final-screen, #very-final-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 70;
+            width: 100%;
+        }
+
+        .funny-text {
+            font-size: 45px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 4px 4px 0px #000, 0 0 20px rgba(255, 20, 147, 0.8);
+            padding: 20px;
+            max-width: 80%;
+            z-index: 90;
+            transition: opacity 0.5s ease;
+        }
+
+        .spin-out { animation: spinOut 1.5s forwards; }
+        @keyframes spinOut {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0) rotate(720deg); opacity: 0; }
+        }
+
+        .pop-in { animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* КРУТЫЕ ФЕЙЕРВЕРКИ (CSS) */
+        .firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            z-index: 80;
+            animation: explode 1s ease-out forwards;
+        }
+        
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(20); opacity: 0; }
+        }
+
+        /* ГУСИ-КАРТИНКИ */
+        .duck-img {
+            position: absolute;
+            width: 350px;
+            z-index: 85;
+            animation: duckPop 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes duckPop {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        /* КРИНЖ-СМАЙЛЫ */
+        #cringe-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+<audio id="clickSound" src="click.mp3"></audio>
+<audio id="typeSound" src="keyboard.mp3"></audio>
+<audio id="gooseSound" src="goose.mp3"></audio>
+<audio id="primoSound" src="elprimo.mp3"></audio>
+
+<button id="startBtn" onclick="startHack()">НАЙТИ БАТЮ</button>
+
+<div id="console"><div id="output"></div></div>
+
+<img id="elprimo" src="elprimo.gif">
+
+<div id="final-screen">
+    <div id="text-part-1" class="funny-text"></div>
+    <div id="text-part-2" class="funny-text" style="color: #ffc000;"></div>
+</div>
+
+<div id="very-final-screen">
+    <div id="cringe-container"></div>
+    <div class="funny-text pop-in" id="final-bestie" style="margin-top: -100px;">ДУРА ГО В МАЙН <br>MY BESTIE ❤️‍🔥</div>
+</div>
+
+<script>
+    const output = document.getElementById('output');
+    const consoleDiv = document.getElementById('console');
+    const elPrimoImg = document.getElementById('elprimo');
+    
+    const LINE_DELAY = 1000;
+    
+    const messages = [
+        { text: ">>> Инициализация модуля: `BrawlHelper_v9.9`...", class: "" },
+        { text: ">>> Подключение к серверу Supercell...", class: "" },
+        { text: ">>> Поиск Бати в кустах...", class: "" },
+        { text: ">>> Координаты получены. IP заблокирован.", class: "warning" },
+        { text: ">>> ЭЛЬ ПРИМО ВЫЛЕТАЕТ НА ПОМОЩЬ!!!", class: "success", triggerPrimo: true }
+    ];
+
+    function addLine(msgObj) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const div = document.createElement('div');
+                div.className = 'line ' + (msgObj.class || '');
+                div.innerText = msgObj.text;
+                output.appendChild(div);
+                
+                if (msgObj.triggerPrimo) {
+                    elPrimoImg.classList.add('elprimo-fly-up');
+                    document.getElementById('primoSound').play().catch(()=>{});
+                }
+                resolve();
+            }, LINE_DELAY);
+        });
+    }
+
+    async function startHack() {
+        document.getElementById('clickSound').play().catch(()=>{});
+        document.getElementById('startBtn').style.display = 'none';
+        consoleDiv.style.display = 'flex';
+
+        for (let msg of messages) {
+            await addLine(msg); 
+        }
+        
+        setTimeout(() => {
+            elPrimoImg.classList.remove('elprimo-fly-up');
+            elPrimoImg.classList.add('elprimo-jump-up');
+            setTimeout(() => elPrimoImg.style.display = 'none', 1000); 
+            setTimeout(showPinkScreen, 500); 
+        }, 4000); 
+    }
+
+    function showPinkScreen() {
+        consoleDiv.style.display = 'none';
+        document.body.style.backgroundColor = '#ff1493';
+        document.body.style.backgroundImage = 'none';
+        document.getElementById('final-screen').style.display = 'flex';
+        
+        let fwInt = setInterval(() => {
+            const fw = document.createElement('div');
+            fw.className = 'firework';
+            const colors = ['#ff0', '#f0f', '#0ff', '#fff', '#f00'];
+            fw.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            fw.style.left = Math.random() * 90 + 'vw';
+            fw.style.top = Math.random() * 90 + 'vh';
+            document.body.appendChild(fw);
+            setTimeout(() => fw.remove(), 1000);
+        }, 200);
+
+        const t1 = "УГРОЗА НЕЙТРАЛИЗОВАНА: Малолетка отправлен делать домашку.";
+        const t2 = "Аяко теперь MILFHUNTERKILLER 😎🔥";
+        
+        typeText(t1, 'text-part-1', () => {
+            setTimeout(() => {
+                typeText(t2, 'text-part-2', () => {
+                    setTimeout(() => {
+                        clearInterval(fwInt);
+                        document.getElementById('text-part-1').style.opacity = '0';
+                        document.getElementById('text-part-2').style.opacity = '0';
+                        
+                        setTimeout(showVeryFinal, 1500);
+                    }, 3000);
+                });
+            }, 800);
+        });
+    }
+
+    function typeText(txt, id, cb) {
+        let i = 0;
+        const el = document.getElementById(id);
+        const audio = document.getElementById('typeSound');
+        function next() {
+            if (i < txt.length) {
+                el.innerHTML += txt[i++];
+                if (audio) { audio.currentTime = 0; audio.play().catch(()=>{}); }
+                setTimeout(next, 80);
+            } else if (cb) cb();
+        }
+        next();
+    }
+
+    function showVeryFinal() {
+        document.getElementById('final-screen').style.display = 'none';
+        
+        const gooseAudio = document.getElementById('gooseSound');
+        gooseAudio.play().catch(()=>{});
+        document.getElementById('very-final-screen').style.display = 'flex';
+        
+        const duckImages = [
+            'duck.jpeg', 'duck0.jpeg', 'duck1.jpeg', 'duck2.jpeg', 'duck3.jpeg', 
+            'duck4.jpeg', 'duck5.jpeg', 'duck6.jpeg', 'duck7.jpeg', 'duck8.jpeg', 
+            'duck9.jpeg', 'duck10.jpeg', 'duck11.jpeg', 'duck12.jpeg', 'duck13.jpeg',
+            'duck14.jpeg', 'duck15.jpeg', 'duck16.jpeg'
+        ];
+        
+        const cringeEmojis = ['🤡', '💀', '💩', '🤑', '👺', '🥵', '🥴', '🤢'];
+        const cringeContainer = document.getElementById('cringe-container');
+        const finalBestieText = document.getElementById('final-bestie');
+        
+        let remainingImages = [...duckImages];
+        
+        // --- Логика: Текст висит, потом исчезает ---
+        setTimeout(() => {
+            finalBestieText.style.opacity = '0';
+        }, 3000); // Текст исчезнет через 3 секунды
+
+        let duckInterval = setInterval(() => {
+            if (remainingImages.length === 0) {
+                remainingImages = [...duckImages];
+            }
+            
+            const img = document.createElement('img');
+            const randomIndex = Math.floor(Math.random() * remainingImages.length);
+            const randomDuck = remainingImages.splice(randomIndex, 1)[0];
+            
+            img.src = randomDuck;
+            img.className = 'duck-img';
+            img.style.left = (Math.random() * 60 + 20) + 'vw';
+            img.style.top = (Math.random() * 60 + 20) + 'vh';
+            
+            document.body.appendChild(img);
+            
+            // --- Смайлы появляются после исчезновения текста ---
+            cringeContainer.innerText = cringeEmojis[Math.floor(Math.random() * cringeEmojis.length)];
+            cringeContainer.style.opacity = '1';
+            
+            img.onerror = function() { img.remove(); console.log("Не найден файл: " + randomDuck); };
+            
+            setTimeout(() => img.remove(), 1000);
+        }, 500); 
+        
+        setTimeout(() => {
+            clearInterval(duckInterval);
+            cringeContainer.style.opacity = '0';
+        }, 10000);
+    }
+</script>
+</body>
+</html>
